@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Safety Net - Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper: Verify if user is the authenticated Admin (Pashu Akter Riya / tariikiht7@gmail.com)
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.email == "tariikiht7@gmail.com" && 
+             request.auth.token.email_verified == true;
+    }
+
+    // Helper: Common ID validations to protect against injection/poisoning
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // 2. Rules for Configs collection (Global Header, Branding and Site Info)
+    match /configs/{configId} {
+      allow read: if true; // Publicly viewable
+      allow write: if isAdmin() && isValidId(configId) && 
+                   incoming().name is string && incoming().name.size() <= 100 &&
+                   incoming().logoUrl is string && incoming().logoUrl.size() <= 500;
+    }
+
+    // 3. Rules for Categories collection
+    match /categories/{categoryId} {
+      allow read: if true; // Publicly viewable
+      allow write: if isAdmin() && isValidId(categoryId) &&
+                   incoming().id is string && incoming().id.size() <= 64 &&
+                   incoming().nameEn is string && incoming().nameEn.size() <= 100 &&
+                   incoming().nameBn is string && incoming().nameBn.size() <= 100;
+    }
+
+    // 4. Rules for Portfolio Items collection
+    match /portfolioItems/{itemId} {
+      allow read: if true; // Publicly viewable
+      allow write: if isAdmin() && isValidId(itemId) &&
+                   incoming().id is string && incoming().id.size() <= 128 &&
+                   incoming().categoryId is string && incoming().categoryId.size() <= 64 &&
+                   incoming().imageUrl is string && incoming().imageUrl.size() <= 500 &&
+                   incoming().titleEn is string && incoming().titleEn.size() <= 200 &&
+                   incoming().titleBn is string && incoming().titleBn.size() <= 200;
+    }
+
+    // 5. Rules for Client Inquiries / Leads collection
+    match /inquiries/{inquiryId} {
+      // Admins can view/list inquiries or clean them up (delete)
+      allow read, delete: if isAdmin();
+      
+      // Public users can submit inquiries
+      allow create: if isValidId(inquiryId) &&
+                    incoming().name is string && incoming().name.size() <= 100 &&
+                    incoming().businessType is string && incoming().businessType.size() <= 150 &&
+                    incoming().message is string && incoming().message.size() <= 2000 &&
+                    incoming().timestamp is string && incoming().timestamp.size() <= 64;
+    }
+  }
+}

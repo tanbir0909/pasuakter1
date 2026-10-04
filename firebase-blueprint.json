@@ -1,0 +1,122 @@
+{
+  "entities": {
+    "Config": {
+      "title": "Config",
+      "description": "Global settings like site name and logo URL.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "The name of the portfolio owner"
+        },
+        "logoUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "The image link for the logo"
+        }
+      },
+      "required": ["name", "logoUrl"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Custom categories for the portfolio section.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "nameEn": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "nameBn": {
+          "type": "string",
+          "maxLength": 100
+        }
+      },
+      "required": ["id", "nameEn", "nameBn"]
+    },
+    "PortfolioItem": {
+      "title": "PortfolioItem",
+      "description": "A single portfolio highlight (Certification / Profit graph)",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "categoryId": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "imageUrl": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "titleEn": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "titleBn": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "descriptionEn": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "descriptionBn": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      },
+      "required": ["id", "categoryId", "imageUrl", "titleEn", "titleBn"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Client lead or business consultation request.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "businessType": {
+          "type": "string",
+          "maxLength": 150
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "timestamp": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": ["name", "businessType", "message", "timestamp"]
+    }
+  },
+  "firestore": {
+    "configs/{configId}": {
+      "schema": "Config",
+      "description": "Collection storing the global branding configurations"
+    },
+    "categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Collection of gallery filter tabs and categories"
+    },
+    "portfolioItems/{itemId}": {
+      "schema": "PortfolioItem",
+      "description": "Portfolio assets including verified certificates and profit reports"
+    },
+    "inquiries/{inquiryId}": {
+      "schema": "Inquiry",
+      "description": "Client business consultation leads"
+    }
+  }
+}
